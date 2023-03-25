@@ -1,0 +1,143 @@
+\documentclass[11pt, fullpage,letterpaper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xspace}
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+\usepackage{hyperref}
+\usepackage{listings}
+
+
+\newcommand{\bx}{{\bf x}}
+\newcommand{\bw}{{\bf w}}
+
+\title{CS 6140:Data Mining Project Intemediate-Report}
+\author{Ghazal Abdollahi\\ Ajantha Varadharaaj\\ Abdias Baldiviezo}
+
+\begin{document}
+\maketitle
+
+\input{emacscomm}
+
+
+
+\section{Analyzing Traffic Flow Patterns on AzureFunctionsDataset2019 through Clustering}
+\begin{flushleft}
+For context refer to our \href{https://docs.google.com/document/d/1YZWRAKUY1-olLNxKiGHXPn6K3Xnj0rWkXE69JiJCMlA/edit?usp=sharing}{(Proposal)}.
+and our \href{https://docs.google.com/document/d/1YZWRAKUY1-olLNxKiGHXPn6K3Xnj0rWkXE69JiJCMlA/edit?usp=sharing}{(Data Collection Report)}.\\
+ Data can be found in our \href{https://github.com/Azure/AzurePublicDataset}{(Github Repo)} which is a preprocessed version of
+\href{https://github.com/Azure/AzurePublicDataset/blob/master/AzureFunctionsDataset2019.md}{(Microsoft's AzurePublicDataset)}.
+
+\end{flushleft}
+
+\section{Progress made towards our goal}
+\begin{flushleft}
+Our progress can me summarized in the findings that resulted of our collection, pre-processing, processing and
+implementation of clustering algorithms to our "Dataset". This application has showed differences in our data points
+with which the data can be separated and clustered.
+\end{flushleft}
+
+\section{What worked well and what did not?}
+\begin{flushleft}
+Our team decided to each take some clustering methods and test them with our data.
+\begin{enumerate}
+    \item \underline{Successes.} Some notable successes in the development of our project were: first, being able to see
+    clearer separations between the clusters after dimensionality reduction and second, recolecting different aspects of
+    the relationships between datapoints from the implementation and hyperparameter tunning in each of our 5 different clustering methods.
+
+    \item \underline{Challenges.} Using all features that our dataset contains has yielded suboptimal results,
+    with a very confusing separation of the data, perhaps because of the low correlations between certain
+    features, to mitigate this aspect we used dimensionality reduction in 2 forms: Feature extraction and Feature
+    selection. Another challenge we faced was long computational times due to the size of our data (approx. 619368)
+    for this we were driven to use a combination of PCA and sub-sampling, which decreased our wait times
+    and gave us more freedom in trying different experiments.
+\end{enumerate}
+
+\end{flushleft}
+
+\section{What could be done to improve the basic approaches?}
+\begin{flushleft}
+    Some improvements that were done/considered during development were:
+    \begin{itemize}
+        \item Using PCA (one or more rounds), tune "n" principal components and variance threshold.
+        \item Use HDBSCAN instead of DBSCAN which transforms space according to density/sparsity.
+        \item Omitting the sparse points with a very significant Euclidean distance from all of the centroids.
+        \item Ommiting mine values, whcih drag the centroids to themselves.
+        \item Use libraries that make use of GPUs to achieve faster processing times (CuML).
+        \item Using metrics to evaluate clustering performance, for example: Elbow method, ARI, and Silhouette Score (knee point).
+    \end{itemize}
+\end{flushleft}
+
+\section{Experiments}
+\begin{flushleft}
+    This is a compact summarization of many steps that went into these experiments.
+    \begin{enumerate}
+        \item \textbf{K-means, birch, and fuzzy} Preprocessing involved almost all of the items
+        in the list above (Fig 1.) which drew the natural shape of the dataset and after normalization (Fig 2-3)
+        and another round of PCA revealed a good separation between clusters. The cosine distance
+        was also calculated between each pair (Fig 4).
+        \break
+        \begin{figure}
+            \begin{minipage}{0.5\textwidth}
+                \caption{Outlier and Mine Omission}
+                \includegraphics[scale=1.0]{ga1}
+            \end{minipage}
+            \begin{minipage}{0.5\textwidth}
+                \caption{Normalized Data}
+                \includegraphics[scale=1.0]{ga2}
+            \end{minipage}
+            \begin{minipage}{0.5\textwidth}
+                \caption{Normalized Data - Heatmap}
+                \includegraphics[scale=1.0]{ga3}
+            \end{minipage}
+            \begin{minipage}{0.5\textwidth}
+                \caption{Cosine distance after 4 rounds of PCA}
+                \includegraphics[scale=1.0]{ga4}
+            \end{minipage}
+        \end{figure}
+        \break
+        \item \textbf{DBSCAN hyperparameters} Preprocessing to implement DBSCAN was crucial and relied on analysis (Fig 5)
+        to find the correct hyperparameters for clustering e.g. Silhouette Score (Fig 6).
+        \begin{figure}
+            \begin{minipage}{0.5\textwidth}
+                \caption{Cumulative variance ratio versus the number of Components}
+                \includegraphics[scale=0.5]{aj1}
+            \end{minipage}
+            \begin{minipage}{0.5\textwidth}
+                \caption{Finding Knee Point}
+                \includegraphics[scale=0.5]{aj2}
+            \end{minipage}
+        \end{figure}
+        \break
+        \item \textbf{DBSCAN subsampling} Feature selection was used for dimensionality reduction, as well 
+        as subsampling for reasonable computing times. The size of the samples was $20000$ out of $\approx$ $650000$
+        datapoints. The features used are "Average", "Count", "Trigger"(Fig 7). 
+        Important parameters were eps (\"...maximum distance between two samples for one to be considered as in the neighborhood 
+        of the other\") and $min\_samples$ (\"The number of samples or total weight in a neighborhood for 
+        a point to be considered as a core point. This includes the point itself.\"), after trying 
+        different combinations of these and because of the size of the dataset, the following 
+        parameters were the ones that showed more promising results: $eps=0.5$ and $min\_samples=100$.
+        \begin{figure}
+            \begin{minipage}{0.5\textwidth}
+                \caption{Approximate number of clusters using DBSCAN}
+                \includegraphics[scale=0.30]{ab1}
+            \end{minipage}
+            \begin{minipage}{0.5\textwidth}
+                \caption{Approximate number of clusters using EM}
+                \includegraphics[scale=0.35]{ab2}
+            \end{minipage}
+        \end{figure}
+        \break
+        \item \textbf{Expectation maximization clustering (Gaussian Mixture)} The covariance matrix
+        and the number of components (The number of mixture components.) were the most important
+        parameters in this experiment. The best separation of data was achieved using $n\_components=3$
+        and $covariance\_type=diag$ (meaning diagonal).
+        Using features ("Average", "Count", "Trigger"), it produced a separation of data
+        vertically and horizontally in contrast to DBSCAN (Fig 8).
+    \end{enumerate}
+\end{flushleft}
+
+\end{document}
